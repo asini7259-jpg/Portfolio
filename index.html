@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Portfolio Analyzer</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="toast-container" id="toast-container"></div>
+
+    <header class="navbar">
+        <div class="logo">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>DevAnalyzer</span>
+        </div>
+        <div class="nav-controls">
+            <button id="autofill-btn" class="btn btn-outline" title="Autofill Demo Data">
+                <i class="fa-solid fa-magic"></i> Demo
+            </button>
+            <button id="theme-toggle" class="icon-btn" title="Toggle Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Input Form Section -->
+        <section id="form-section" class="card">
+            <div class="card-header">
+                <h1>Analyze Your Portfolio</h1>
+                <p>Fill in the details below to get a comprehensive performance score and actionable feedback.</p>
+            </div>
+            
+            <form id="analyzer-form">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="fullName">Full Name *</label>
+                        <input type="text" id="fullName" placeholder="John Doe" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" placeholder="john@example.com" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="skills">Skills * <span class="help-text">(Comma-separated, e.g. React, Node.js, Python)</span></label>
+                        <input type="text" id="skills" placeholder="HTML, CSS, JavaScript, React" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="techKnown">Technologies/Tools Known</label>
+                        <select id="techKnown" multiple class="custom-select">
+                            <option value="git">Git</option>
+                            <option value="docker">Docker</option>
+                            <option value="aws">AWS</option>
+                            <option value="figma">Figma</option>
+                            <option value="linux">Linux</option>
+                            <option value="jest">Jest</option>
+                        </select>
+                        <span class="help-text">Hold Ctrl/Cmd to select multiple</span>
+                    </div>
+                    <div class="input-group">
+                        <label for="projectCount">Number of Projects *</label>
+                        <input type="number" id="projectCount" min="0" placeholder="e.g. 5" required>
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="projectDesc">Project Descriptions * <span class="help-text">(Paste descriptions of your top projects)</span></label>
+                        <textarea id="projectDesc" rows="4" placeholder="Built a responsive e-commerce web app using React and Node.js..." required></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="githubLink">GitHub Profile Link</label>
+                        <input type="url" id="githubLink" placeholder="https://github.com/username">
+                    </div>
+                    <div class="input-group">
+                        <label for="portfolioLink">Portfolio Website Link</label>
+                        <input type="url" id="portfolioLink" placeholder="https://yourportfolio.com">
+                    </div>
+                    <div class="input-group">
+                        <label for="resumeUpload">Resume Upload (PDF/Word)</label>
+                        <div class="file-upload">
+                            <input type="file" id="resumeUpload" accept=".pdf,.doc,.docx">
+                            <label for="resumeUpload" class="file-label">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <span id="file-name">Choose a file...</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="uiuxRating">Rate Your Portfolio's UI/UX (1-10) *</label>
+                        <div class="slider-container">
+                            <input type="range" id="uiuxRating" min="1" max="10" value="5" class="slider" required>
+                            <span id="rating-val" class="slider-val">5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" id="reset-form-btn" class="btn btn-outline">Clear</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <span class="btn-text">Analyze Portfolio</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Loading View -->
+        <section id="loading-section" class="hidden">
+            <div class="loader-container">
+                <div class="spinner"></div>
+                <h2>Analyzing your profile...</h2>
+                <p>Evaluating skills, project quality, and profile completeness.</p>
+            </div>
+        </section>
+
+        <!-- Results Dashboard Section -->
+        <section id="results-section" class="hidden">
+            <div class="dashboard-header">
+                <div class="dashboard-title-group">
+                    <h2>Analysis Results</h2>
+                    <span id="role-badge" class="role-badge hidden"><i class="fa-solid fa-user-tie"></i> Suggested Role: <strong id="role-text">N/A</strong></span>
+                </div>
+                <div class="dashboard-actions">
+                    <button id="download-pdf-btn" class="btn btn-outline" title="Download Report">
+                        <i class="fa-solid fa-download"></i> PDF
+                    </button>
+                    <button id="reanalyze-btn" class="btn btn-primary">
+                        <i class="fa-solid fa-rotate-right"></i> Analyze Another
+                    </button>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Score Card -->
+                <div class="card score-card">
+                    <h3>Overall Score</h3>
+                    <div class="circular-progress" id="score-circle">
+                        <div class="inner-circle">
+                            <span id="total-score" class="score-value">0</span>
+                        </div>
+                    </div>
+                    <p id="score-message" class="score-message">Great job! Let's see how to improve.</p>
+                </div>
+
+                <!-- Breakdown Chart -->
+                <div class="card chart-card">
+                    <h3>Category Breakdown</h3>
+                    <div class="chart-container">
+                        <canvas id="breakdownChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Suggestions Panel -->
+                <div class="card feedback-card full-width">
+                    <h3>Personalized Feedback</h3>
+                    <ul id="feedback-list" class="feedback-list">
+                        <!-- Feedbacks appended dynamically -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- HTML2PDF library for PDF download (optional bonus) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
